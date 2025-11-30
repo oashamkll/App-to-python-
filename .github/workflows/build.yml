@@ -1,0 +1,38 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Скачиваем ваш код
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Освобождаем место на диске (Android SDK занимает много места)
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: false # Не удалять Android tools, они нужны
+
+      # 3. Запускаем сборку через готовый Action
+      - name: Build with Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
+        with:
+          command: buildozer android debug
+          buildozer_version: stable
+
+      # 4. Загружаем готовый APK вам в артефакты
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: zen-breathe-apk
+          path: bin/*.apk
